@@ -139,11 +139,37 @@ class FitJourneyApp:
 
     def logout_and_redirect(self):
         """Logout the user and redirect to the main window."""
-        if self.window is not None: 
-            self.window.destroy()  
-        self.main_window()  
+        if self.window is not None:  # Check if there's an active window
+            self.window.destroy()  # Close the current window
+        self.main_window()  # Open the main login/register window
 
-    
+    # Main Dashboard
+    # def main_dashboard(self, user_id):
+    #     self.window.destroy()  # Destroy the previous window
+    #     self.window = tk.Tk()
+    #     self.window.resizable(False, False)  # Disable resizing
+    #     self.window.title("FitJourney Dashboard")
+
+    #     # Window dimensions
+    #     window_width = 400
+    #     window_height = 300
+
+    #     # Center the window
+    #     position_x = (self.window.winfo_screenwidth() // 2) - (window_width // 2)
+    #     position_y = (self.window.winfo_screenheight() // 2) - (window_height // 2)
+    #     self.window.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
+
+    #     frame = ttk.Frame(self.window)
+    #     frame.pack(padx=20, pady=20)
+
+    #     ttk.Label(frame, text="Welcome to FitJourney!", font=("Arial", 18, "bold")).pack(pady=20)
+
+    #     ttk.Button(frame, text="Log Workout", command=lambda: self.log_workout(user_id)).pack(pady=10)
+    #     ttk.Button(frame, text="View Progress", command=lambda: self.plot_progress(user_id)).pack(pady=10)
+
+    #     # Back Button to go back to the login screen
+    #     ttk.Button(frame, text="Logout", command=lambda: self.logout_and_redirect()).pack(pady=10)
+
 
 
     #     self.window.mainloop()
