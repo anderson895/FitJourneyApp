@@ -143,41 +143,7 @@ class FitJourneyApp:
             self.window.destroy()  # Close the current window
         self.main_window()  # Open the main login/register window
 
-    # Main Dashboard
-    # def main_dashboard(self, user_id):
-    #     self.window.destroy()  # Destroy the previous window
-    #     self.window = tk.Tk()
-    #     self.window.resizable(False, False)  # Disable resizing
-    #     self.window.title("FitJourney Dashboard")
-
-    #     # Window dimensions
-    #     window_width = 400
-    #     window_height = 300
-
-    #     # Center the window
-    #     position_x = (self.window.winfo_screenwidth() // 2) - (window_width // 2)
-    #     position_y = (self.window.winfo_screenheight() // 2) - (window_height // 2)
-    #     self.window.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
-
-    #     frame = ttk.Frame(self.window)
-    #     frame.pack(padx=20, pady=20)
-
-    #     ttk.Label(frame, text="Welcome to FitJourney!", font=("Arial", 18, "bold")).pack(pady=20)
-
-    #     ttk.Button(frame, text="Log Workout", command=lambda: self.log_workout(user_id)).pack(pady=10)
-    #     ttk.Button(frame, text="View Progress", command=lambda: self.plot_progress(user_id)).pack(pady=10)
-
-    #     # Back Button to go back to the login screen
-    #     ttk.Button(frame, text="Logout", command=lambda: self.logout_and_redirect()).pack(pady=10)
-
-
-
-    #     self.window.mainloop()
-    import tkinter as tk
-    from tkinter import ttk
-    from PIL import Image, ImageTk  # Install Pillow if not already installed
-
-
+   
 
     def main_dashboard(self, user_id):
         self.window.destroy()  # Destroy the previous window
@@ -227,105 +193,7 @@ class FitJourneyApp:
         self.window.mainloop()
 
 
-    # Log Workout
-    # def log_workout(self, user_id):
-    #     def save_log():
-    #         # Retrieve input values first
-            
-    #         workout_type = combobox_workout_type.get()
-    #         exercise_type = combobox_exercise_type.get()
-    #         duration = entry_duration.get()
-    #         fitness_goal = combobox_fitness_goal.get()
-    #         weight = entry_weight.get()
-    #         height = entry_height.get()
-
-    #         # Validate input fields
-    #         if not all([workout_type, exercise_type, duration, fitness_goal, weight, height]):
-    #             messagebox.showerror("Error", "All fields are required.")
-    #             return
-
-    #         try:
-    #             duration = float(duration)
-    #             weight = float(weight)
-    #             height = float(height)
-    #         except ValueError:
-    #             messagebox.showerror("Error", "Duration, Weight, and Height must be numbers.")
-    #             return
-
-    #         # Destroy the log_window only after successful retrieval and validation
-    #         log_window.destroy()
-
-    #         # Calculate calories
-    #         calories = self.calculate_calories(workout_type, duration)
-
-    #         # Save data to the database
-    #         conn = self.connect_db()
-    #         if conn:
-    #             cursor = conn.cursor()
-    #             cursor.execute(
-    #                 "INSERT INTO logs (user_id, workout_type, exercise_type, duration, calories, fitness_goal, weight, height, date_logged) "
-    #                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())",
-    #                 (user_id, workout_type, exercise_type, duration, calories, fitness_goal, weight, height),
-    #             )
-    #             conn.commit()
-    #             conn.close()
-    #             messagebox.showinfo("Success", "Workout logged successfully!")
-
-
-    #     def update_exercises(event):
-    #         # Dynamically update exercises based on workout type
-    #         self.window.resizable(False, False)  # Disable resizing
-    #         workout_type = combobox_workout_type.get()
-    #         exercises = {
-    #             "Chest": ["Bench Press", "Push-ups", "Chest Fly", "Incline Press"],
-    #             "Back": ["Pull-ups", "Deadlifts", "Lat Pulldowns", "Rows"],
-    #             "Legs": ["Squats", "Leg Press", "Lunges", "Leg Curls"],
-    #             "Arms": ["Bicep Curls", "Tricep Dips", "Barbell Curl", "Hammer Curl"],
-    #             "Cardio":["Running", "Cycling", "Swimming", "Jump Rope"],
-    #         }
-    #         combobox_exercise_type['values'] = exercises.get(workout_type, [])
-    #         combobox_exercise_type.set("")  # Clear previous selection
-
-    #     # Create a new window
-    #     log_window = tk.Toplevel()
-    #     log_window.resizable(False, False)  # Disable resizing
-    #     canvas = self.setup_window_with_background(log_window, "Log Workout", 500, 500, "images/background.jpg")
-
-    #     # Center alignment
-    #     canvas_width = 500
-    #     x_center = canvas_width // 2
-
-    #     # Input Fields on Canvas
-    #     canvas.create_text(x_center, 40, text="Workout Type:", anchor="center", font=("Arial", 12))
-    #     combobox_workout_type = ttk.Combobox(log_window, values=["Chest", "Back", "Legs", "Arms", "Cardio"])
-    #     combobox_workout_type.bind("<<ComboboxSelected>>", update_exercises)
-    #     canvas.create_window(x_center, 60, window=combobox_workout_type, width=250)
-
-    #     canvas.create_text(x_center, 90, text="Exercise Type:", anchor="center", font=("Arial", 12))
-    #     combobox_exercise_type = ttk.Combobox(log_window)
-    #     canvas.create_window(x_center, 120, window=combobox_exercise_type, width=250)
-
-    #     canvas.create_text(x_center, 160, text="Duration (mins):", anchor="center", font=("Arial", 12))
-    #     entry_duration = ttk.Entry(log_window)
-    #     canvas.create_window(x_center,190, window=entry_duration, width=250)
-
-    #     canvas.create_text(x_center, 230, text="Fitness Goal:", anchor="center", font=("Arial", 12))
-    #     combobox_fitness_goal = ttk.Combobox(log_window, values=["Lose Weight", "Build Muscle", "Stay Fit"])
-    #     canvas.create_window(x_center, 260, window=combobox_fitness_goal, width=250)
-
-    #     canvas.create_text(x_center, 300, text="Weight (kg):", anchor="center", font=("Arial", 12))
-    #     entry_weight = ttk.Entry(log_window)
-    #     canvas.create_window(x_center, 330, window=entry_weight, width=250)
-
-    #     canvas.create_text(x_center, 370, text="Height (cm):", anchor="center", font=("Arial", 12))
-    #     entry_height = ttk.Entry(log_window)
-    #     canvas.create_window(x_center, 400, window=entry_height, width=250)
-
-    #     save_button = ttk.Button(log_window, text="Save", command=save_log)
-    #     canvas.create_window(x_center, 440, window=save_button)
-
-    #     back_button = ttk.Button(self.window, text="Back", command=lambda: self.main_dashboard(user_id))
-    #     canvas.create_window(x_center, 470, window=back_button)
+   
     def log_workout(self, user_id):
         def save_log():
             # Retrieve input values
@@ -441,21 +309,35 @@ class FitJourneyApp:
     # Plot Progress
         # Plot Progress
         # Plot Progress with Responsiveness
+
+
+
+        
     def plot_progress(self, user_id):
         progress_window = tk.Toplevel()
         progress_window.title("Workout Progress")
-        progress_window.resizable(False, False)
-        progress_window.geometry("900x600")
+        progress_window.resizable(True, True)  # Allow resizing
+        progress_window.geometry("900x750")
         progress_window.minsize(900, 600)
 
         conn = self.connect_db()
         if conn:
             cursor = conn.cursor()
+            
+            # Query to get the log data
             cursor.execute(
-                "SELECT date_logged, workout_type, duration, calories, fitness_goal, weight, height, reps FROM logs WHERE user_id = %s ORDER BY date_logged ASC",
+                "SELECT id, date_logged, workout_type, duration, calories, fitness_goal, weight, height, reps FROM logs WHERE user_id = %s ORDER BY date_logged ASC",
                 (user_id,)
             )
             data = cursor.fetchall()
+
+            # Query to count the number of logs
+            cursor.execute(
+                "SELECT COUNT(*) FROM logs WHERE user_id = %s",
+                (user_id,)
+            )
+            log_count = cursor.fetchone()[0]  # Fetch the count result
+
             conn.close()
 
             if not data:
@@ -463,7 +345,12 @@ class FitJourneyApp:
                 progress_window.destroy()
                 return
 
-            dates, workout_types, durations, calories, fitness_goals, weights, heights, reps = zip(*data)
+            # Display the log count
+            log_count_label = ttk.Label(progress_window, text=f"Total Logs: {log_count}")
+            log_count_label.pack(pady=10)
+
+            # Extract data for the plot
+            log_ids, dates, workout_types, durations, calories, fitness_goals, weights, heights, reps = zip(*data)
 
             # Main container frame
             main_frame = ttk.Frame(progress_window)
@@ -491,46 +378,230 @@ class FitJourneyApp:
 
             # Frame for Table
             table_frame = ttk.Frame(main_frame)
-            table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True, pady=(10, 0))
+            table_frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-            # Scrollable table
-            scrollable_table_frame = ttk.Frame(table_frame)
-            scrollable_table_frame.pack(fill=tk.BOTH, expand=True)
+            # Create a canvas to add scrolling
+            canvas_table = tk.Canvas(table_frame)
+            canvas_table.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-            # Vertical scrollbar
-            y_scrollbar = ttk.Scrollbar(scrollable_table_frame, orient=tk.VERTICAL)
-            y_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            # Create a scrollbar for the canvas
+            scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=canvas_table.yview)
+            scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+            canvas_table.configure(yscrollcommand=scrollbar.set)
 
-            # Horizontal scrollbar
-            x_scrollbar = ttk.Scrollbar(scrollable_table_frame, orient=tk.HORIZONTAL)
-            x_scrollbar.pack(side=tk.BOTTOM, fill=tk.X)
+            # Create the table (Treeview) widget
+            tree = ttk.Treeview(canvas_table, columns=("ID", "Date", "Workout Type", "Duration", "Calories", "Goal", "Weight", "Height", "Reps"), show="headings")
+            tree.pack(fill=tk.BOTH, expand=True)
 
-            # Treeview
-            columns = ("Date", "Workout Type", "Duration (mins)", "Calories Burned", "Fitness Goal", "Weight (kg)", "Height (cm)", "Reps")
-            treeview = ttk.Treeview(
-                scrollable_table_frame, 
-                columns=columns, 
-                show="headings", 
-                yscrollcommand=y_scrollbar.set, 
-                xscrollcommand=x_scrollbar.set
-            )
-            y_scrollbar.config(command=treeview.yview)
-            x_scrollbar.config(command=treeview.xview)
-            treeview.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+            # Define columns and headings
+            tree.heading("ID", text="ID")
+            tree.heading("Date", text="Date")
+            tree.heading("Workout Type", text="Workout Type")
+            tree.heading("Duration", text="Duration (mins)")
+            tree.heading("Calories", text="Calories")
+            tree.heading("Goal", text="Fitness Goal")
+            tree.heading("Weight", text="Weight (kg)")
+            tree.heading("Height", text="Height (cm)")
+            tree.heading("Reps", text="Reps")
 
-            # Configure column headers
-            for col in columns:
-                treeview.heading(col, text=col)
-                treeview.column(col, anchor="center", width=120)
+            # Adjust column width
+            tree.column("ID", width=50)
+            tree.column("Date", width=150)
+            tree.column("Workout Type", width=150)
+            tree.column("Duration", width=100)
+            tree.column("Calories", width=100)
+            tree.column("Goal", width=100)
+            tree.column("Weight", width=100)
+            tree.column("Height", width=100)
+            tree.column("Reps", width=100)
 
-            # Populate table
-            for i in range(len(dates)):
-                treeview.insert("", "end", values=(dates[i], workout_types[i], durations[i], calories[i], fitness_goals[i], weights[i], heights[i], reps[i]))
+            # Insert logs into the treeview table
+            for i, log_id in enumerate(log_ids):
+                tree.insert("", "end", values=(log_id, dates[i], workout_types[i], durations[i], calories[i], fitness_goals[i], weights[i], heights[i], reps[i]))
 
-            # Back button at the bottom
-            back_button = ttk.Button(progress_window, text="Back", command=progress_window.destroy)
-            back_button.place(relx=0.5, rely=1.0, anchor="s", y=-10)  # Center horizontally, at the bottom
+            # Functions for editing and deleting logs
+            def edit_log():
+                selected_item = tree.selection()
+                if not selected_item:
+                    messagebox.showerror("Error", "Please select a log entry to edit.")
+                    return
 
+                selected_log_id = tree.item(selected_item)["values"][0]  # Get selected log ID
+                self.edit_log_entry(user_id, selected_log_id, progress_window)
+
+            def delete_log():
+                selected_item = tree.selection()
+                if not selected_item:
+                    messagebox.showerror("Error", "Please select a log entry to delete.")
+                    return
+
+                selected_log_id = tree.item(selected_item)["values"][0]  # Get selected log ID
+                response = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete the log entry with ID {selected_log_id}?")
+                if response:
+                    self.delete_log_entry(selected_log_id, user_id, progress_window)
+
+            # Add buttons for editing and deleting
+            btn_edit_log = ttk.Button(progress_window, text="Edit Log", command=edit_log)
+            btn_delete_log = ttk.Button(progress_window, text="Delete Log", command=delete_log)
+
+            # Position the buttons
+            btn_edit_log.pack(side=tk.LEFT, padx=10, pady=10)
+            btn_delete_log.pack(side=tk.LEFT, padx=10, pady=10)
+
+            # Add a Back button to close the progress window
+            def go_back():
+                progress_window.destroy()
+
+            btn_back = ttk.Button(progress_window, text="Back", command=go_back)
+            btn_back.pack(side=tk.BOTTOM, padx=10, pady=10)
+
+            progress_window.mainloop()
+
+
+
+
+
+
+
+    def edit_log_entry(self, user_id, log_id, progress_window):
+    # Create a new window for editing the log entry
+        edit_window = tk.Toplevel()
+        edit_window.resizable(False, False)
+        edit_window.title("Edit Log")
+
+        conn = self.connect_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT workout_type, exercise_type, duration, reps, calories, fitness_goal, weight, height FROM logs WHERE id = %s AND user_id = %s", (log_id, user_id))
+            data = cursor.fetchone()
+            conn.close()
+
+        if not data:
+            messagebox.showerror("Error", "Log entry not found.")
+            return
+
+        workout_type, exercise_type, duration, reps, calories, fitness_goal, weight, height = data
+
+        # Add form fields to edit log details
+        canvas = self.setup_window_with_background(edit_window, "Edit Log", 500, 550, "images/background.jpg")
+
+        x_center = 250  # Center alignment for canvas
+
+        canvas.create_text(x_center, 40, text="Workout Type:", anchor="center", font=("Arial", 12))
+        combobox_workout_type = ttk.Combobox(edit_window, values=["Chest", "Back", "Legs", "Arms", "Cardio"])
+        combobox_workout_type.set(workout_type)  # Set the current value
+        canvas.create_window(x_center, 60, window=combobox_workout_type, width=250)
+
+        canvas.create_text(x_center, 90, text="Exercise Type:", anchor="center", font=("Arial", 12))
+        combobox_exercise_type = ttk.Combobox(edit_window)
+        combobox_exercise_type.set(exercise_type)  # Set the current value
+        canvas.create_window(x_center, 120, window=combobox_exercise_type, width=250)
+
+        # Function to update exercises based on selected workout type
+        def update_exercises(event):
+            selected_workout_type = combobox_workout_type.get()
+            exercises = {
+                "Chest": ["Bench Press", "Push-ups", "Chest Fly", "Incline Press"],
+                "Back": ["Pull-ups", "Deadlifts", "Lat Pulldowns", "Rows"],
+                "Legs": ["Squats", "Leg Press", "Lunges", "Leg Curls"],
+                "Arms": ["Bicep Curls", "Tricep Dips", "Barbell Curl", "Hammer Curl"],
+                "Cardio": ["Running", "Cycling", "Swimming", "Jump Rope"],
+            }
+            combobox_exercise_type['values'] = exercises.get(selected_workout_type, [])
+            combobox_exercise_type.set(exercise_type)  # Reset exercise type to the current value after update
+
+        combobox_workout_type.bind("<<ComboboxSelected>>", update_exercises)
+        update_exercises(None)  # Initial update for exercise types
+
+        canvas.create_text(x_center, 160, text="Duration (mins):", anchor="center", font=("Arial", 12))
+        entry_duration = ttk.Entry(edit_window)
+        entry_duration.insert(0, duration)
+        canvas.create_window(x_center, 190, window=entry_duration, width=250)
+
+        canvas.create_text(x_center, 220, text="Reps:", anchor="center", font=("Arial", 12))
+        entry_reps = ttk.Entry(edit_window)
+        entry_reps.insert(0, reps)
+        canvas.create_window(x_center, 250, window=entry_reps, width=250)
+
+        canvas.create_text(x_center, 300, text="Fitness Goal:", anchor="center", font=("Arial", 12))
+        combobox_fitness_goal = ttk.Combobox(edit_window, values=["Lose Weight", "Build Muscle", "Stay Fit"])
+        combobox_fitness_goal.set(fitness_goal)
+        canvas.create_window(x_center, 330, window=combobox_fitness_goal, width=250)
+
+        canvas.create_text(x_center, 370, text="Weight (kg):", anchor="center", font=("Arial", 12))
+        entry_weight = ttk.Entry(edit_window)
+        entry_weight.insert(0, weight)
+        canvas.create_window(x_center, 400, window=entry_weight, width=250)
+
+        canvas.create_text(x_center, 440, text="Height (cm):", anchor="center", font=("Arial", 12))
+        entry_height = ttk.Entry(edit_window)
+        entry_height.insert(0, height)
+        canvas.create_window(x_center, 470, window=entry_height, width=250)
+
+        def save_edited_log():
+            new_workout_type = combobox_workout_type.get()
+            new_exercise_type = combobox_exercise_type.get()
+            new_duration = entry_duration.get()
+            new_reps = entry_reps.get()
+            new_fitness_goal = combobox_fitness_goal.get()
+            new_weight = entry_weight.get()
+            new_height = entry_height.get()
+
+            # Validate input fields
+            if not all([new_workout_type, new_exercise_type, new_duration, new_reps, new_fitness_goal, new_weight, new_height]):
+                messagebox.showerror("Error", "All fields are required.")
+                return
+
+            try:
+                new_duration = float(new_duration)
+                new_reps = int(new_reps)
+                new_weight = float(new_weight)
+                new_height = float(new_height)
+            except ValueError:
+                messagebox.showerror("Error", "Please enter valid numeric values for duration, reps, weight, and height.")
+                return
+
+            conn = self.connect_db()
+            if conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE logs
+                    SET workout_type = %s, exercise_type = %s, duration = %s, reps = %s, calories = %s, fitness_goal = %s, weight = %s, height = %s
+                    WHERE id = %s AND user_id = %s
+                """, (new_workout_type, new_exercise_type, new_duration, new_reps, new_duration * 5, new_fitness_goal, new_weight, new_height, log_id, user_id))
+                conn.commit()
+                conn.close()
+
+                messagebox.showinfo("Success", "Log updated successfully.")
+                edit_window.destroy()
+
+                # Close the progress window and reload it
+                progress_window.destroy()
+                self.plot_progress(user_id)  # Reopen with updated data
+
+        # Add Save button
+        btn_save = ttk.Button(edit_window, text="Save Changes", command=save_edited_log)
+        canvas.create_window(x_center, 510, window=btn_save, width=250)
+
+        edit_window.mainloop()
+
+
+
+
+
+    def delete_log_entry(self, log_id, user_id, progress_window):
+        conn = self.connect_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM logs WHERE id = %s", (log_id,))
+            conn.commit()
+            conn.close()
+
+        messagebox.showinfo("Success", "Log deleted successfully.")
+
+        # Close the progress window and reload it
+        progress_window.destroy()
+        self.plot_progress(user_id)  # Reopen with updated data
 
 
 
