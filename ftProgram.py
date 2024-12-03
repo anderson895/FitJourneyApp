@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from PIL import Image, ImageTk
-import pymysql
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from connection import Connections 
@@ -746,7 +745,7 @@ class FitJourneyApp:
             log_window.destroy()
 
             # Calculate calories (considering reps)
-            calories = self.calculate_calories(workout_type, duration, reps)
+            calories = self.calculate_calories(workout_type, exercise_type, duration, reps)
 
             # Save data to the database
             conn = self.db_connection.connect_db()
@@ -781,10 +780,9 @@ class FitJourneyApp:
             if exercises:
                 exercise_names = [exercise[0] for exercise in exercises]  # Extract exercise names from the result
                 combobox_exercise_type['values'] = exercise_names
-                combobox_exercise_type.set(selected_workout_type)  # Set the current exercise type value
+                combobox_exercise_type.set("")  # Reset the current value
             else:
                 combobox_exercise_type['values'] = []  # Clear the list if no exercises are found
-
 
         # Create a new window
         log_window = tk.Toplevel()
@@ -795,9 +793,19 @@ class FitJourneyApp:
 
         # Add input fields
         canvas.create_text(x_center, 40, text="Workout Type:", anchor="center", font=("Arial", 12))
-        combobox_workout_type = ttk.Combobox(log_window, values=["Chest", "Back", "Legs", "Arms", "Cardio"])
+        combobox_workout_type = ttk.Combobox(log_window)
         combobox_workout_type.bind("<<ComboboxSelected>>", update_exercises)
         canvas.create_window(x_center, 60, window=combobox_workout_type, width=250)
+
+        # Dynamically load workout types
+        conn = self.db_connection.connect_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM workout_types")
+            workout_types = cursor.fetchall()
+            conn.close()
+        workout_names = [wt[0] for wt in workout_types] if workout_types else ["Chest", "Back", "Legs", "Arms", "Cardio"]
+        combobox_workout_type['values'] = workout_names
 
         canvas.create_text(x_center, 90, text="Exercise Type:", anchor="center", font=("Arial", 12))
         combobox_exercise_type = ttk.Combobox(log_window)
