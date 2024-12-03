@@ -4,25 +4,11 @@ from PIL import Image, ImageTk
 import pymysql
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-
+from connection import Connections 
 
 class FitJourneyApp:
     def __init__(self):
-        self.db_config = {
-            "host": "localhost",
-            "user": "root",
-            "password": "",
-            "database": "fitjourney",
-        }
-        self.window = None
-    
-    # Database connection
-    def connect_db(self):
-        try:
-            return pymysql.connect(**self.db_config)
-        except pymysql.MySQLError as e:
-            messagebox.showerror("Database Error", f"Could not connect to database:\n{e}")
-            return None
+        self.db_connection = Connections()
 
     # Setup window with background
     def setup_window_with_background(self, window, title, width, height, image_path):
@@ -72,7 +58,7 @@ class FitJourneyApp:
                 messagebox.showerror("Error", "Both fields are required.")
                 return
 
-            conn = self.connect_db()
+            conn = self.db_connection.connect_db()
             if conn:
                 cursor = conn.cursor()
                 cursor.execute("SELECT id FROM users WHERE username = %s AND password = %s", (username, password))
@@ -113,7 +99,7 @@ class FitJourneyApp:
                 messagebox.showerror("Error", "Both fields are required.")
                 return
 
-            conn = self.connect_db()
+            conn = self.db_connection.connect_db()
             if conn:
                 cursor = conn.cursor()
                 cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
@@ -226,7 +212,7 @@ class FitJourneyApp:
             calories = self.calculate_calories(workout_type, duration, reps)
 
             # Save data to the database
-            conn = self.connect_db()
+            conn = self.db_connection.connect_db()
             if conn:
                 cursor = conn.cursor()
                 cursor.execute(
@@ -239,16 +225,29 @@ class FitJourneyApp:
                 messagebox.showinfo("Success", "Workout logged successfully!")
 
         def update_exercises(event):
-            workout_type = combobox_workout_type.get()
-            exercises = {
-                "Chest": ["Bench Press", "Push-ups", "Chest Fly", "Incline Press"],
-                "Back": ["Pull-ups", "Deadlifts", "Lat Pulldowns", "Rows"],
-                "Legs": ["Squats", "Leg Press", "Lunges", "Leg Curls"],
-                "Arms": ["Bicep Curls", "Tricep Dips", "Barbell Curl", "Hammer Curl"],
-                "Cardio": ["Running", "Cycling", "Swimming", "Jump Rope"],
-            }
-            combobox_exercise_type['values'] = exercises.get(workout_type, [])
-            combobox_exercise_type.set("")  # Clear previous selection
+            selected_workout_type = combobox_workout_type.get()
+
+            # Retrieve exercises based on selected workout type
+            conn = self.db_connection.connect_db()
+            if conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT e.name
+                    FROM exercise_types e
+                    JOIN workout_types w ON e.workout_type_id = w.id
+                    WHERE w.name = %s
+                """, (selected_workout_type,))
+                exercises = cursor.fetchall()
+                conn.close()
+
+            # Populate combobox with exercises
+            if exercises:
+                exercise_names = [exercise[0] for exercise in exercises]  # Extract exercise names from the result
+                combobox_exercise_type['values'] = exercise_names
+                combobox_exercise_type.set(selected_workout_type)  # Set the current exercise type value
+            else:
+                combobox_exercise_type['values'] = []  # Clear the list if no exercises are found
+
 
         # Create a new window
         log_window = tk.Toplevel()
@@ -320,7 +319,7 @@ class FitJourneyApp:
         progress_window.geometry("900x750")
         progress_window.minsize(900, 600)
 
-        conn = self.connect_db()
+        conn = self.db_connection.connect_db()
         if conn:
             cursor = conn.cursor()
             
@@ -464,12 +463,12 @@ class FitJourneyApp:
 
 
     def edit_log_entry(self, user_id, log_id, progress_window):
-    # Create a new window for editing the log entry
+        # Create a new window for editing the log entry
         edit_window = tk.Toplevel()
         edit_window.resizable(False, False)
         edit_window.title("Edit Log")
 
-        conn = self.connect_db()
+        conn = self.db_connection.connect_db()
         if conn:
             cursor = conn.cursor()
             cursor.execute("SELECT workout_type, exercise_type, duration, reps, calories, fitness_goal, weight, height FROM logs WHERE id = %s AND user_id = %s", (log_id, user_id))
@@ -500,15 +499,27 @@ class FitJourneyApp:
         # Function to update exercises based on selected workout type
         def update_exercises(event):
             selected_workout_type = combobox_workout_type.get()
-            exercises = {
-                "Chest": ["Bench Press", "Push-ups", "Chest Fly", "Incline Press"],
-                "Back": ["Pull-ups", "Deadlifts", "Lat Pulldowns", "Rows"],
-                "Legs": ["Squats", "Leg Press", "Lunges", "Leg Curls"],
-                "Arms": ["Bicep Curls", "Tricep Dips", "Barbell Curl", "Hammer Curl"],
-                "Cardio": ["Running", "Cycling", "Swimming", "Jump Rope"],
-            }
-            combobox_exercise_type['values'] = exercises.get(selected_workout_type, [])
-            combobox_exercise_type.set(exercise_type)  # Reset exercise type to the current value after update
+
+            # Retrieve exercises based on selected workout type
+            conn = self.db_connection.connect_db()
+            if conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    SELECT e.name
+                    FROM exercise_types e
+                    JOIN workout_types w ON e.workout_type_id = w.id
+                    WHERE w.name = %s
+                """, (selected_workout_type,))
+                exercises = cursor.fetchall()
+                conn.close()
+
+            # Populate combobox with exercises
+            if exercises:
+                exercise_names = [exercise[0] for exercise in exercises]  # Extract exercise names from the result
+                combobox_exercise_type['values'] = exercise_names
+                combobox_exercise_type.set(exercise_type)  # Set the current exercise type value
+            else:
+                combobox_exercise_type['values'] = []  # Clear the list if no exercises are found
 
         combobox_workout_type.bind("<<ComboboxSelected>>", update_exercises)
         update_exercises(None)  # Initial update for exercise types
@@ -561,7 +572,7 @@ class FitJourneyApp:
                 messagebox.showerror("Error", "Please enter valid numeric values for duration, reps, weight, and height.")
                 return
 
-            conn = self.connect_db()
+            conn = self.db_connection.connect_db()
             if conn:
                 cursor = conn.cursor()
                 cursor.execute("""
@@ -590,7 +601,7 @@ class FitJourneyApp:
 
 
     def delete_log_entry(self, log_id, user_id, progress_window):
-        conn = self.connect_db()
+        conn = self.db_connection.connect_db()
         if conn:
             cursor = conn.cursor()
             cursor.execute("DELETE FROM logs WHERE id = %s", (log_id,))
