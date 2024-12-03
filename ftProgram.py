@@ -34,19 +34,83 @@ class FitJourneyApp:
     def main_window(self):
         self.window = tk.Tk()
         self.window.resizable(False, False)  # Disable resizing
+
+        # Setup background
         canvas = self.setup_window_with_background(self.window, "FitJourney - Login", 400, 300, "images/background.jpg")
 
         # Welcome Text
-        canvas.create_text(200, 100, text="Welcome to FitJourney!", font=("Arial", 20, "bold"), fill="black")
+        canvas.create_text(200, 50, text="Welcome to FitJourney!", font=("Arial", 20, "bold"), fill="black")
 
-        # Buttons
-        login_button = ttk.Button(self.window, text="Login", command=self.login_user)
+        # Login Buttons (User and Admin)
+        login_user_button = ttk.Button(self.window, text="Login as User", command=self.login_user)
+        login_admin_button = ttk.Button(self.window, text="Login as Admin", command=self.login_admin)
+
+        # Register Button
         register_button = ttk.Button(self.window, text="Register", command=self.register_user)
 
-        canvas.create_window(200, 150, window=login_button)
+        # Placing buttons on the canvas
+        canvas.create_window(200, 120, window=login_user_button)
+        canvas.create_window(200, 160, window=login_admin_button)
         canvas.create_window(200, 200, window=register_button)
 
+        # Start the main loop to display the window
         self.window.mainloop()
+
+
+
+
+
+
+
+
+    # Admin Login
+    def login_admin(self):
+        def verify_login():
+            username = entry_username.get()
+            password = entry_password.get()
+
+            if not username or not password:
+                messagebox.showerror("Error", "Both fields are required.")
+                return
+
+            conn = self.db_connection.connect_db()
+            if conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT admin_id FROM admin WHERE admin_username = %s AND admin_password = %s", (username, password))
+                user = cursor.fetchone()
+                conn.close()
+
+                if user:
+                    messagebox.showinfo("Success", "Login successful!")
+                    login_window.destroy()
+                    self.admin_dashboard(user[0])
+                else:
+                    messagebox.showerror("Error", "Invalid username or password.")
+
+        login_window = tk.Toplevel()
+        login_window.resizable(False, False)  # Disable resizing
+        canvas = self.setup_window_with_background(login_window, "Admin Login", 400, 300, "images/background.jpg")
+
+        # Title label for admin login
+        canvas.create_text(200, 40, text="Admin Login", anchor="center", font=("Arial", 16, "bold"), fill="black")
+
+        # Username label and input
+        canvas.create_text(200, 100, text="Username:", anchor="center", font=("Arial", 12))
+        entry_username = ttk.Entry(login_window)
+        canvas.create_window(200, 130, window=entry_username, width=250)
+
+        # Password label and input
+        canvas.create_text(200, 170, text="Password:", anchor="center", font=("Arial", 12))
+        entry_password = ttk.Entry(login_window, show="*")
+        canvas.create_window(200, 200, window=entry_password, width=250)
+
+        # Login button
+        login_button = ttk.Button(login_window, text="Login", command=verify_login)
+        canvas.create_window(200, 250, window=login_button, width=100)
+
+        login_window.mainloop()
+
+
 
     # User Login
     def login_user(self):
@@ -99,9 +163,19 @@ class FitJourneyApp:
                 messagebox.showerror("Error", "Both fields are required.")
                 return
 
+            # Check if the username already exists in the database
             conn = self.db_connection.connect_db()
             if conn:
                 cursor = conn.cursor()
+                cursor.execute("SELECT COUNT(*) FROM users WHERE username = %s", (username,))
+                user_count = cursor.fetchone()[0]
+                
+                if user_count > 0:
+                    messagebox.showerror("Error", "Username already exists. Please choose a different username.")
+                    conn.close()
+                    return  # Prevent further registration if the username exists
+                
+                # If username doesn't exist, proceed with registration
                 cursor.execute("INSERT INTO users (username, password) VALUES (%s, %s)", (username, password))
                 conn.commit()
                 conn.close()
@@ -123,13 +197,198 @@ class FitJourneyApp:
         save_button = ttk.Button(register_window, text="Register", command=save_user)
         canvas.create_window(200, 200, window=save_button)
 
+
     def logout_and_redirect(self):
         """Logout the user and redirect to the main window."""
         if self.window is not None:  # Check if there's an active window
             self.window.destroy()  # Close the current window
         self.main_window()  # Open the main login/register window
 
-   
+
+
+
+
+
+
+
+
+
+    def admin_dashboard(self, user_id):
+        self.window.destroy()  # Destroy the previous window
+        self.window = tk.Tk()
+        self.window.resizable(False, False)  # Disable resizing
+        self.window.title("FitJourney Dashboard")
+
+        # Window dimensions
+        window_width = 500
+        window_height = 400
+
+        # Center the window
+        position_x = (self.window.winfo_screenwidth() // 2) - (window_width // 2)
+        position_y = (self.window.winfo_screenheight() // 2) - (window_height // 2)
+        self.window.geometry(f"{window_width}x{window_height}+{position_x}+{position_y}")
+
+        # Add a canvas to set the background image
+        canvas = tk.Canvas(self.window, width=window_width, height=window_height)
+        canvas.pack(fill="both", expand=True)
+
+        # Load the background image
+        bg_image = Image.open("images/background.jpg")  # Replace with your image path
+        bg_image = bg_image.resize((window_width, window_height), Image.Resampling.LANCZOS)  # High-quality resizing
+        bg_image_tk = ImageTk.PhotoImage(bg_image)
+
+        # Add the image to the canvas
+        canvas.create_image(0, 0, anchor="nw", image=bg_image_tk)
+
+        # Admin Dashboard Header
+        canvas.create_text(
+            window_width // 2, 40, 
+            text="FitJourney Admin Dashboard", 
+            font=("Arial", 20, "bold"), 
+            fill="black"
+        )
+
+        # Display Admin Info
+        canvas.create_text(
+            window_width // 2, 80, 
+            text=f"Admin ID: {user_id}", 
+            font=("Arial", 12), 
+            fill="black"
+        )
+
+        # Add buttons for the dashboard functionality
+        btn_manage_users = ttk.Button(self.window, text="Manage Users", command=self.manage_users)
+        btn_logout = ttk.Button(self.window, text="Logout", command=self.logout_and_redirect)
+
+        # Place buttons on the canvas
+        canvas.create_window(window_width // 2, 120, window=btn_manage_users)
+        canvas.create_window(window_width // 2, 170, window=btn_logout)
+
+        self.window.mainloop()
+
+
+    def manage_users(self):
+        # Close the previous manage window if it's still open
+        if hasattr(self, 'manage_window') and self.manage_window.winfo_exists():
+            self.manage_window.destroy()
+
+        # Create a new window to manage users
+        self.manage_window = tk.Toplevel()
+        self.manage_window.title("Manage Users")
+        self.manage_window.geometry("600x400")
+
+        # Create Treeview widget to display users
+        tree = ttk.Treeview(self.manage_window, columns=("ID", "Username", "Password"), show="headings")
+        tree.heading("ID", text="User ID")
+        tree.heading("Username", text="Username")
+        tree.heading("Password", text="Password")
+        tree.pack(fill=tk.BOTH, expand=True)
+
+        # Fetch user data from the database
+        conn = self.db_connection.connect_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, username, password FROM users")
+            users = cursor.fetchall()
+            conn.close()
+
+            # Insert the user data into the Treeview
+            for user in users:
+                tree.insert("", "end", values=user)
+
+        # Function to edit a selected user
+        def edit_user():
+            selected_item = tree.selection()
+            if selected_item:
+                user_id = tree.item(selected_item)["values"][0]
+                self.edit_user_window(user_id)
+            else:
+                messagebox.showwarning("Selection Error", "Please select a user to edit.")
+
+        # Function to delete a selected user
+        def delete_user():
+            selected_item = tree.selection()
+            if selected_item:
+                user_id = tree.item(selected_item)["values"][0]
+                confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete user {user_id}?")
+                if confirm:
+                    conn = self.db_connection.connect_db()
+                    if conn:
+                        cursor = conn.cursor()
+                        cursor.execute("DELETE FROM users WHERE id = %s", (user_id,))
+                        conn.commit()
+                        conn.close()
+                        tree.delete(selected_item)  # Remove from treeview
+                        messagebox.showinfo("Success", f"User {user_id} deleted successfully.")
+            else:
+                messagebox.showwarning("Selection Error", "Please select a user to delete.")
+
+        # Add Edit and Delete buttons
+        btn_edit = ttk.Button(self.manage_window, text="Edit User", command=edit_user)
+        btn_edit.pack(side=tk.LEFT, padx=20, pady=20)
+
+        btn_delete = ttk.Button(self.manage_window, text="Delete User", command=delete_user)
+        btn_delete.pack(side=tk.LEFT, padx=20, pady=20)
+
+
+
+    def edit_user_window(self, user_id):
+        # Create a new window to edit user details
+        edit_window = tk.Toplevel()
+        edit_window.title("Edit User")
+        edit_window.geometry("400x300")
+
+        # Fetch user details from the database
+        conn = self.db_connection.connect_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT username, password FROM users WHERE id = %s", (user_id,))
+            user = cursor.fetchone()
+            conn.close()
+
+        # Create Entry fields for Username and Password
+        canvas = tk.Canvas(edit_window, width=400, height=300)
+        canvas.pack()
+
+        canvas.create_text(100, 50, text="Username:", anchor="e", font=("Arial", 12))
+        entry_username = ttk.Entry(edit_window)
+        entry_username.insert(0, user[0])  # Set the current username
+        canvas.create_window(220, 50, window=entry_username, width=180)
+
+        canvas.create_text(100, 100, text="Password:", anchor="e", font=("Arial", 12))
+        entry_password = ttk.Entry(edit_window, show="*")
+        entry_password.insert(0, user[1])  # Set the current password
+        canvas.create_window(220, 100, window=entry_password, width=180)
+
+        # Function to save edited details
+        def save_changes():
+            new_username = entry_username.get()
+            new_password = entry_password.get()
+
+            if not new_username or not new_password:
+                messagebox.showerror("Error", "Both fields are required.")
+                return
+
+            conn = self.db_connection.connect_db()
+            if conn:
+                cursor = conn.cursor()
+                cursor.execute("UPDATE users SET username = %s, password = %s WHERE id = %s", 
+                            (new_username, new_password, user_id))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Success", "User details updated successfully.")
+                edit_window.destroy()
+                # Reload manage users window
+                self.manage_users()
+
+
+        # Save changes button
+        btn_save = ttk.Button(edit_window, text="Save Changes", command=save_changes)
+        canvas.create_window(200, 200, window=btn_save, width=120)
+
+
+
+
 
     def main_dashboard(self, user_id):
         self.window.destroy()  # Destroy the previous window
