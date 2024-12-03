@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 03, 2024 at 06:25 AM
+-- Generation Time: Dec 03, 2024 at 07:06 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -68,7 +68,7 @@ INSERT INTO `exercise_types` (`id`, `workout_type_id`, `name`) VALUES
 (8, 2, 'Rows'),
 (9, 3, 'Squats'),
 (10, 3, 'Leg Press'),
-(11, 3, 'Lunges'),
+(11, 5, 'Lunges'),
 (12, 3, 'Leg Curls'),
 (13, 4, 'Bicep Curls'),
 (14, 4, 'Tricep Dips'),
@@ -105,7 +105,9 @@ CREATE TABLE `logs` (
 
 INSERT INTO `logs` (`id`, `user_id`, `date_logged`, `workout_type`, `exercise_type`, `duration`, `calories`, `fitness_goal`, `weight`, `height`, `reps`) VALUES
 (3, 1, '2024-11-21 13:03:41', 'Back', 'Deadlifts', 20, 162, 'Stay Fit', 50, 170, 20),
-(4, 1, '2024-11-21 13:04:57', 'Back', 'Deadlifts', 20, 162, 'Stay Fit', 49, 170, 20);
+(4, 1, '2024-11-21 13:04:57', 'Back', 'Deadlifts', 20, 162, 'Stay Fit', 49, 170, 20),
+(11, 3, '2024-12-03 14:02:56', 'Legs', 'Leg Curls', 5, 35.5, 'Build Muscle', 5, 5, 5),
+(12, 3, '2024-12-03 14:03:27', 'Arms', 'Barbell Curl', 6, 30.6, 'Build Muscle', 7, 8, 6);
 
 -- --------------------------------------------------------
 
@@ -146,7 +148,7 @@ CREATE TABLE `workout_types` (
 
 INSERT INTO `workout_types` (`id`, `name`) VALUES
 (1, 'Chest'),
-(2, 'Back'),
+(2, 'Back to back'),
 (3, 'Legs'),
 (4, 'Arms'),
 (5, 'Cardio');
@@ -166,7 +168,7 @@ ALTER TABLE `admin`
 --
 ALTER TABLE `exercise_types`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `workout_type_id` (`workout_type_id`);
+  ADD KEY `exercise_types_ibfk_1` (`workout_type_id`);
 
 --
 -- Indexes for table `logs`
@@ -208,7 +210,7 @@ ALTER TABLE `exercise_types`
 -- AUTO_INCREMENT for table `logs`
 --
 ALTER TABLE `logs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -230,7 +232,7 @@ ALTER TABLE `workout_types`
 -- Constraints for table `exercise_types`
 --
 ALTER TABLE `exercise_types`
-  ADD CONSTRAINT `exercise_types_ibfk_1` FOREIGN KEY (`workout_type_id`) REFERENCES `workout_types` (`id`);
+  ADD CONSTRAINT `exercise_types_ibfk_1` FOREIGN KEY (`workout_type_id`) REFERENCES `workout_types` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `logs`

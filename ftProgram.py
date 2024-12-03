@@ -257,14 +257,160 @@ class FitJourneyApp:
         )
 
         # Add buttons for the dashboard functionality
+        btn_manage_Worktype = ttk.Button(self.window, text="Manage Worktype", command=self.manage_worktype)
+        btn_manage_Exercise = ttk.Button(self.window, text="Manage Exercise", command=self.manage_Exercise)
         btn_manage_users = ttk.Button(self.window, text="Manage Users", command=self.manage_users)
         btn_logout = ttk.Button(self.window, text="Logout", command=self.logout_and_redirect)
 
         # Place buttons on the canvas
-        canvas.create_window(window_width // 2, 120, window=btn_manage_users)
-        canvas.create_window(window_width // 2, 170, window=btn_logout)
+        canvas.create_window(window_width // 2, 120, window=btn_manage_Worktype)
+        canvas.create_window(window_width // 2, 170, window=btn_manage_Exercise)
+        canvas.create_window(window_width // 2, 220, window=btn_manage_users)
+        canvas.create_window(window_width // 2, 270, window=btn_logout)
 
         self.window.mainloop()
+
+
+    def manage_worktype(self):
+        # Close the previous manage window if it's still open
+        if hasattr(self, 'manage_window') and self.manage_window.winfo_exists():
+            self.manage_window.destroy()
+
+        # Create a new window to manage workout types
+        self.manage_window = tk.Toplevel()
+        self.manage_window.title("Manage Workout Types")
+        self.manage_window.geometry("600x400")
+
+        # Create Treeview widget to display workout types
+        tree = ttk.Treeview(self.manage_window, columns=("ID", "Name"), show="headings")
+        tree.heading("ID", text="Type ID")
+        tree.heading("Name", text="Workout Type Name")
+        tree.pack(fill=tk.BOTH, expand=True)
+
+        # Fetch workout type data from the database
+        conn = self.db_connection.connect_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT id, name FROM workout_types")
+            workout_types = cursor.fetchall()
+            conn.close()
+
+            # Insert the workout type data into the Treeview
+            for workout in workout_types:
+                tree.insert("", "end", values=workout)
+
+        # Function to edit a selected workout type
+        def edit_workout_type():
+            selected_item = tree.selection()
+            if selected_item:
+                type_id = tree.item(selected_item)["values"][0]
+                self.edit_workout_type_window(type_id)
+            else:
+                messagebox.showwarning("Selection Error", "Please select a workout type to edit.")
+
+        # Function to delete a selected workout type
+        def delete_workout_type():
+            selected_item = tree.selection()
+            if selected_item:
+                type_id = tree.item(selected_item)["values"][0]
+                confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete workout type {type_id}?")
+                if confirm:
+                    conn = self.db_connection.connect_db()
+                    if conn:
+                        cursor = conn.cursor()
+                        cursor.execute("DELETE FROM workout_types WHERE id = %s", (type_id,))
+                        conn.commit()
+                        conn.close()
+                        tree.delete(selected_item)  # Remove from treeview
+                        messagebox.showinfo("Success", f"Workout type {type_id} deleted successfully.")
+            else:
+                messagebox.showwarning("Selection Error", "Please select a workout type to delete.")
+
+        # Add Edit and Delete buttons
+        btn_edit = ttk.Button(self.manage_window, text="Edit Workout Type", command=edit_workout_type)
+        btn_edit.pack(side=tk.LEFT, padx=20, pady=20)
+
+        btn_delete = ttk.Button(self.manage_window, text="Delete Workout Type", command=delete_workout_type)
+        btn_delete.pack(side=tk.LEFT, padx=20, pady=20)
+
+
+
+
+    def manage_Exercise(self):
+        # Close the previous manage window if it's still open
+        if hasattr(self, 'manage_window') and self.manage_window.winfo_exists():
+            self.manage_window.destroy()
+
+        # Create a new window to manage exercises
+        self.manage_window = tk.Toplevel()
+        self.manage_window.title("Manage Exercises")
+        self.manage_window.geometry("800x400")
+
+        # Create Treeview widget to display exercises
+        tree = ttk.Treeview(self.manage_window, columns=("ID", "Name", "Workout Type"), show="headings")
+        tree.heading("ID", text="Exercise ID")
+        tree.heading("Name", text="Exercise Name")
+        tree.heading("Workout Type", text="Workout Type")
+        tree.pack(fill=tk.BOTH, expand=True)
+
+        # Fetch exercise data from the database
+        conn = self.db_connection.connect_db()
+        if conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT e.id, e.name, w.name AS workout_type
+                FROM exercise_types e
+                LEFT JOIN workout_types w ON e.workout_type_id = w.id
+            """)
+            exercises = cursor.fetchall()
+            conn.close()
+
+            # Insert the exercise data into the Treeview
+            for exercise in exercises:
+                tree.insert("", "end", values=exercise)
+
+        # Function to edit a selected exercise
+        def edit_exercise():
+            selected_item = tree.selection()
+            if selected_item:
+                exercise_id = tree.item(selected_item)["values"][0]
+                self.edit_exercise_window(exercise_id)
+            else:
+                messagebox.showwarning("Selection Error", "Please select an exercise to edit.")
+
+        # Function to delete a selected exercise
+        def delete_exercise():
+            selected_item = tree.selection()
+            if selected_item:
+                exercise_id = tree.item(selected_item)["values"][0]
+                confirm = messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete exercise {exercise_id}?")
+                if confirm:
+                    conn = self.db_connection.connect_db()
+                    if conn:
+                        cursor = conn.cursor()
+                        cursor.execute("DELETE FROM exercise_types WHERE id = %s", (exercise_id,))
+                        conn.commit()
+                        conn.close()
+                        tree.delete(selected_item)  # Remove from treeview
+                        messagebox.showinfo("Success", f"Exercise {exercise_id} deleted successfully.")
+            else:
+                messagebox.showwarning("Selection Error", "Please select an exercise to delete.")
+
+        # Add Edit and Delete buttons
+        btn_edit = ttk.Button(self.manage_window, text="Edit Exercise", command=edit_exercise)
+        btn_edit.pack(side=tk.LEFT, padx=20, pady=20)
+
+        btn_delete = ttk.Button(self.manage_window, text="Delete Exercise", command=delete_exercise)
+        btn_delete.pack(side=tk.LEFT, padx=20, pady=20)
+
+
+
+
+
+
+
+
+
 
 
     def manage_users(self):
@@ -383,6 +529,138 @@ class FitJourneyApp:
 
 
         # Save changes button
+        btn_save = ttk.Button(edit_window, text="Save Changes", command=save_changes)
+        canvas.create_window(200, 200, window=btn_save, width=120)
+
+
+
+
+
+
+
+
+    def edit_workout_type_window(self, type_id):
+        # Create a new window to edit workout type details
+            edit_window = tk.Toplevel()
+            edit_window.title("Edit Workout Type")
+            edit_window.geometry("400x300")
+
+            # Fetch workout type details from the database
+            conn = self.db_connection.connect_db()
+            if conn:
+                cursor = conn.cursor()
+                cursor.execute("SELECT name FROM workout_types WHERE id = %s", (type_id,))
+                workout_type = cursor.fetchone()
+                conn.close()
+
+            # Create Entry field for Workout Type Name
+            canvas = tk.Canvas(edit_window, width=400, height=300)
+            canvas.pack()
+
+            canvas.create_text(100, 50, text="Workout Type Name:", anchor="e", font=("Arial", 12))
+            entry_name = ttk.Entry(edit_window)
+            entry_name.insert(0, workout_type[0])  # Set the current workout type name
+            canvas.create_window(220, 50, window=entry_name, width=180)
+
+            # Function to save edited details
+            def save_changes():
+                new_name = entry_name.get()
+
+                if not new_name:
+                    messagebox.showerror("Error", "Workout Type Name is required.")
+                    return
+
+                conn = self.db_connection.connect_db()
+                if conn:
+                    cursor = conn.cursor()
+                    cursor.execute("UPDATE workout_types SET name = %s WHERE id = %s", 
+                                (new_name, type_id))
+                    conn.commit()
+                    conn.close()
+                    messagebox.showinfo("Success", "Workout Type details updated successfully.")
+                    edit_window.destroy()
+                    # Reload manage workout types window
+                    self.manage_worktype()
+
+            # Save changes button
+            btn_save = ttk.Button(edit_window, text="Save Changes", command=save_changes)
+            canvas.create_window(200, 150, window=btn_save, width=120)
+
+
+
+
+    def edit_exercise_window(self, exercise_id):
+        # Create a new window to edit exercise details
+        edit_window = tk.Toplevel()
+        edit_window.title("Edit Exercise")
+        edit_window.geometry("400x300")
+
+        # Fetch exercise details from the database
+        conn = self.db_connection.connect_db()
+        exercise = None
+        workout_types = []
+        if conn:
+            cursor = conn.cursor()
+            # Fetch exercise details
+            cursor.execute("SELECT name, workout_type_id FROM exercise_types WHERE id = %s", (exercise_id,))
+            exercise = cursor.fetchone()
+
+            # Fetch available workout types
+            cursor.execute("SELECT id, name FROM workout_types")
+            workout_types = cursor.fetchall()
+            conn.close()
+
+        if not exercise:
+            messagebox.showerror("Error", "Exercise not found.")
+            edit_window.destroy()
+            return
+
+        # Extract current details
+        current_name, current_workout_type_id = exercise
+
+        # Create canvas for layout
+        canvas = tk.Canvas(edit_window, width=400, height=300)
+        canvas.pack()
+
+        # Exercise Name
+        canvas.create_text(100, 50, text="Exercise Name:", anchor="e", font=("Arial", 12))
+        entry_name = ttk.Entry(edit_window)
+        entry_name.insert(0, current_name)  # Set the current exercise name
+        canvas.create_window(220, 50, window=entry_name, width=180)
+
+        # Workout Type Dropdown
+        canvas.create_text(100, 100, text="Workout Type:", anchor="e", font=("Arial", 12))
+        workout_type_var = tk.StringVar(value=str(current_workout_type_id))
+        dropdown_workout_type = ttk.Combobox(edit_window, textvariable=workout_type_var, state="readonly")
+        dropdown_workout_type["values"] = [f"{wt[0]} - {wt[1]}" for wt in workout_types]
+        dropdown_workout_type.pack()
+        canvas.create_window(220, 100, window=dropdown_workout_type, width=180)
+
+        # Function to save edited details
+        def save_changes():
+            new_name = entry_name.get()
+            selected_workout_type = workout_type_var.get().split(" - ")[0]  # Extract type ID
+
+            if not new_name or not selected_workout_type:
+                messagebox.showerror("Error", "All fields are required.")
+                return
+
+            conn = self.db_connection.connect_db()
+            if conn:
+                cursor = conn.cursor()
+                cursor.execute("""
+                    UPDATE exercise_types 
+                    SET name = %s, workout_type_id = %s 
+                    WHERE id = %s
+                """, (new_name, selected_workout_type, exercise_id))
+                conn.commit()
+                conn.close()
+                messagebox.showinfo("Success", "Exercise details updated successfully.")
+                edit_window.destroy()
+                # Reload manage exercise window
+                self.manage_Exercise()
+
+        # Save Changes Button
         btn_save = ttk.Button(edit_window, text="Save Changes", command=save_changes)
         canvas.create_window(200, 200, window=btn_save, width=120)
 
