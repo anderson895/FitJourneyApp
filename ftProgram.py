@@ -745,7 +745,7 @@ class FitJourneyApp:
             log_window.destroy()
 
             # Calculate calories (considering reps)
-            calories = self.calculate_calories(workout_type, exercise_type, duration, reps)
+            calories = self.calculate_calories(workout_type, duration, reps)
 
             # Save data to the database
             conn = self.db_connection.connect_db()
